@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace AniyomiEpisodesExtractor
 {
@@ -20,19 +22,43 @@ namespace AniyomiEpisodesExtractor
 
             int filesMoved = 0;
 
+            List<(FileInfo, DirectoryInfo)> filesToBeMoved = new List<(FileInfo, DirectoryInfo)>();
 
             foreach (var dir in directory.GetDirectories())
             {
-                foreach (var file in dir.GetFiles("*.mp4"))
+                foreach (var file in dir.GetFiles("*.*").Where(s => s.Extension == ".mp4" || s.Extension == ".mkv"))
                 {
-                    file.MoveTo($"{directory.FullName}/{file.Name}");
+                    filesToBeMoved.Add((file, dir));
                     Console.WriteLine($"{directory.FullName}/{file.Name}");
-                    filesMoved++;
-                    dir.Delete(true);
                 }
             }
 
+            Console.WriteLine("\nThe following files will be processed... do you want to proceed? [Y/N]");
+
+            KeyInput:
+
+            var answer = Console.ReadLine();
+            if (answer == "n" || answer == "N")
+            {
+                Console.WriteLine("Operation canceled.");
+                return;
+            }
+
+            if (answer != "y" && answer != "Y")
+            {
+                Console.WriteLine("Please enter either Y (yes) or N (no)");
+                goto KeyInput;
+            }
+
+            foreach (var (file, parent) in filesToBeMoved)
+            {
+                file.MoveTo($"{directory.FullName}/{file.Name}");
+                filesMoved++;
+                parent.Delete(true);
+            }
+
             Console.WriteLine($"\n{filesMoved} files were moved!");
+            Console.ReadKey();
         }
     }
 }
