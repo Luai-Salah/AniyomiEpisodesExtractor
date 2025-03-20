@@ -11,15 +11,19 @@ namespace AniyomiEpisodesExtractor
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("No Argumants provided, so no action will be taken!");
+                Console.WriteLine("No option was specified, the only option available is '-c' for current directory...");
+                Console.ReadKey();
                 return;
             }
 
             if (args[0] != "-c")
+            {
+                Console.WriteLine($"the option '{args[0]}' isn't known, the only option available is '-c' for current directory...");
+                Console.ReadKey();
                 return;
+            }
 
             var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
-
             int filesMoved = 0;
 
             List<(FileInfo, DirectoryInfo)> filesToBeMoved = new List<(FileInfo, DirectoryInfo)>();
@@ -33,7 +37,13 @@ namespace AniyomiEpisodesExtractor
                 }
             }
 
-            Console.WriteLine("\nThe following files will be processed... do you want to proceed? [Y/N]");
+            if (filesToBeMoved.Count == 0) {
+                Console.WriteLine("No episodes found to be moved");
+                Console.ReadKey();
+                return;
+            }
+
+            Console.WriteLine("\nThe following episodes will be processed... do you want to proceed? [Y/N]");
 
             KeyInput:
 
@@ -57,7 +67,7 @@ namespace AniyomiEpisodesExtractor
                 parent.Delete(true);
             }
 
-            Console.WriteLine($"\n{filesMoved} files were moved!");
+            Console.WriteLine($"\n{filesMoved} episodes were moved!");
             Console.ReadKey();
         }
     }
